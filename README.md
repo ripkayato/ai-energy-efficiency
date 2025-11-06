@@ -1,7 +1,16 @@
-# AI-система прогнозирования энергопотребления НПЗ
+# AI-система оптимизации энергоэффективности НПЗ
 
-**5 микросервисов | Docker Compose | Prophet | Streamlit | FastAPI**
+**Техлид:** @ripkayato  
+**Git Flow:** `main` → `develop` → `feature/*`
 
-## Запуск одной командой:
+## Ветки
+- `main` — только релиз (защищён)
+- `develop` — основная разработка
+- `feature/*` — задачи (PR → develop)
+
+## Как работать
 ```bash
-docker-compose up --build
+git checkout develop
+git pull
+git checkout -b feature/твоя-задача
+# код → commit → push → PR в develop
