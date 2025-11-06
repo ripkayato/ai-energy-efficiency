@@ -11,12 +11,12 @@ app = FastAPI()
 @app.get("/forecast")
 def get_forecast():
     try:
-        # Используем путь из volume mount
+        # Используем путь из volume mount (файл создаётся в /app внутри ai-model контейнера)
         forecast_path = "/ai-model/forecast.json"
         with open(forecast_path) as f:
             return json.load(f)
     except FileNotFoundError:
-        return {"error": "Прогноз ещё не готов"}
+        return {"error": "Прогноз ещё не готов. Убедитесь, что ai-model сервис завершил работу успешно."}
     except Exception as e:
         return {"error": f"Ошибка чтения прогноза: {str(e)}"}
 

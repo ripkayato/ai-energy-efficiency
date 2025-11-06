@@ -11,9 +11,45 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Запуск Docker
-        run: docker-compose up -d
+      
+      - name: Запуск Docker Compose
+        run: docker-compose up -d --build
+      
+      - name: Ожидание готовности сервисов
+        run: |
+          echo "Ожидание готовности сервисов..."
+          sleep 30
+          # Проверяем, что контейнеры запущены
+          docker-compose ps
+      
       - name: Проверка API
-        run: curl -f http://localhost:8000 || exit 1
+        run: |
+          for i in {1..10}; do
+            if curl -f http://localhost:8000/forecast --max-time 5; then
+              echo "API доступен"
+              exit 0
+            fi
+            echo "Попытка $i/10: API ещё не готов, ожидание..."
+            sleep 5
+          done
+          echo "API недоступен после 10 попыток"
+          exit 1
+      
       - name: Проверка дашборда
-        run: curl -f http://localhost:8501 || exit 1
+        run: |
+          for i in {1..10}; do
+            if curl -f http://localhost:8501 --max-time 5; then
+              echo "Дашборд доступен"
+              exit 0
+            fi
+            echo "Попытка $i/10: Дашборд ещё не готов, ожидание..."
+            sleep 5
+          done
+          echo "Дашборд недоступен после 10 попыток"
+          exit 1
+      
+      - name: Проверка логов
+        if: failure()
+        run: |
+          echo "=== Логи всех сервисов ==="
+          docker-compose logs

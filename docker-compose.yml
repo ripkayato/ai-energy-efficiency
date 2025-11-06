@@ -1,16 +1,20 @@
 services:
   data-generator:
     build: ./data-generator
+    restart: "no"
     volumes:
-      - ./shared-data:/shared  # ← НОВОЕ
+      - ./shared-data:/shared
 
   etl:
     build: ./etl
+    restart: "no"
     depends_on:
-      - database
-      - data-generator
+      database:
+        condition: service_healthy
+      data-generator:
+        condition: service_completed_successfully
     volumes:
-      - ./shared-data:/shared  # ← НОВОЕ
+      - ./shared-data:/shared
 
   database:
     image: postgres:15
@@ -23,17 +27,27 @@ services:
     volumes:
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d energy"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   ai-model:
     build: ./ai-model
+    restart: "no"
     depends_on:
-      - database
-      - etl
+      database:
+        condition: service_healthy
+      etl:
+        condition: service_completed_successfully
     volumes:
       - ./ai-model:/app
+      - ./shared-data:/shared
 
   web-app:
     build: ./web-app
+    restart: unless-stopped
     ports:
       - "8000:8000"
       - "8501:8501"
@@ -41,6 +55,8 @@ services:
       - ai-model
     volumes:
       - ./ai-model:/ai-model
+    environment:
+      - API_URL=http://localhost:8000/forecast
 
 volumes:
   pgdata:
