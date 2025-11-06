@@ -1,13 +1,46 @@
-version: '3.8'
 services:
-  backend:
-    build: ./backend
+  data-generator:
+    build: ./data-generator
+    volumes:
+      - ./shared-data:/shared  # ← НОВОЕ
+
+  etl:
+    build: ./etl
+    depends_on:
+      - database
+      - data-generator
+    volumes:
+      - ./shared-data:/shared  # ← НОВОЕ
+
+  database:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: energy
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+
+  ai-model:
+    build: ./ai-model
+    depends_on:
+      - database
+      - etl
+    volumes:
+      - ./ai-model:/app
+
+  web-app:
+    build: ./web-app
     ports:
       - "8000:8000"
-
-  frontend:
-    build: ./frontend
-    ports:
       - "8501:8501"
     depends_on:
-      - backend
+      - ai-model
+    volumes:
+      - ./ai-model:/ai-model
+
+volumes:
+  pgdata:
