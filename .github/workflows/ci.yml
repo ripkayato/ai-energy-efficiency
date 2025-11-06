@@ -1,0 +1,19 @@
+name: CI — Проверка
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Запуск Docker
+        run: docker-compose up -d
+      - name: Проверка API
+        run: curl -f http://localhost:8000 || exit 1
+      - name: Проверка дашборда
+        run: curl -f http://localhost:8501 || exit 1
