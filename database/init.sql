@@ -6,3 +6,11 @@ CREATE TABLE IF NOT EXISTS measurements (
     temp FLOAT,
     efficiency FLOAT
 );
+
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100),
+    hashed_password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
