@@ -1,7 +1,20 @@
-FROM python:3.11
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["python", "app.py"]
+FROM node:18-alpine
 
+WORKDIR /app
+
+# Установка зависимостей
+COPY package*.json ./
+RUN npm install
+
+# Копирование исходного кода
+COPY . .
+
+# Генерация Prisma Client
+RUN npx prisma generate
+
+# Сборка приложения
+RUN npm run build
+
+EXPOSE 8000
+
+CMD ["npm", "run", "start:prod"]

@@ -37,10 +37,10 @@ services:
         condition: service_completed_successfully
     volumes:
       - ./shared-data:/shared
-      - ./backend:/app
     environment:
       - DATABASE_URL=postgresql://user:pass@database:5432/energy
       - SECRET_KEY=your-secret-key-change-in-production
+      - PORT=8000
 
   # Веб-приложение (Streamlit)
   web-app:
