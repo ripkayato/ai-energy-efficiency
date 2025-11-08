@@ -30,9 +30,9 @@ ai-energy-efficiency/
 
 ## Технологии
 
-- **Backend:** JavaScript, NestJS, Prisma
+- **Backend:** FastAPI, Python, SQLAlchemy, Prophet / Node.js, NestJS или Express, Prisma
 - **Database:** PostgreSQL
-- **Frontend:** Streamlit, Plotly
+- **Frontend:** Streamlit, Plotly / React, Next.js, Plotly.js
 - **Infrastructure:** Docker, Docker Compose
 
 - При желании технологии можно менять (уточняйте)
