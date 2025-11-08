@@ -1,21 +1,12 @@
 services:
+  # Сервис генерации данных (симуляция SCADA/ERP)
   data-generator:
     build: ./data-generator
     restart: "no"
     volumes:
       - ./shared-data:/shared
 
-  etl:
-    build: ./etl
-    restart: "no"
-    depends_on:
-      database:
-        condition: service_healthy
-      data-generator:
-        condition: service_completed_successfully
-    volumes:
-      - ./shared-data:/shared
-
+  # База данных PostgreSQL
   database:
     image: postgres:15
     environment:
@@ -33,41 +24,34 @@ services:
       timeout: 5s
       retries: 5
 
-  ai-model:
-    build: ./ai-model
-    restart: "no"
+  # Backend сервис (ETL + AI + KPI + Auth)
+  backend:
+    build: ./backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
     depends_on:
       database:
         condition: service_healthy
-      etl:
+      data-generator:
         condition: service_completed_successfully
     volumes:
-      - ./ai-model:/app
       - ./shared-data:/shared
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://user:pass@database:5432/energy
+      - SECRET_KEY=your-secret-key-change-in-production
 
+  # Веб-приложение (Streamlit)
   web-app:
     build: ./web-app
     restart: unless-stopped
     ports:
-      - "8000:8000"
       - "8501:8501"
     depends_on:
-      - ai-model
-    volumes:
-      - ./ai-model:/ai-model
+      - backend
     environment:
-      - API_URL=http://localhost:8000/forecast
-
-  auth-service:
-    build: ./auth-service
-    restart: unless-stopped
-    ports:
-      - "8001:8001"
-    depends_on:
-      database:
-        condition: service_healthy
-    environment:
-      - SECRET_KEY=your-secret-key-change-in-production
+      - BACKEND_API_URL=http://backend:8000
 
 volumes:
   pgdata:
