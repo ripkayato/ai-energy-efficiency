@@ -1,4 +1,0 @@
-prophet
-pandas
-sqlalchemy
-psycopg2-binary
