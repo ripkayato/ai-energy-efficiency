@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model RawData {
+  id             Int       @id @default(autoincrement())
+  timestamp      DateTime
+  installationId String?   @map("installation_id")
+  powerKwh       Float     @map("power_kwh")
+  loadPercent    Float?    @map("load_percent")
+  temperature    Float?
+  pressure       Float?
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@map("raw_data")
+  @@index([timestamp])
+}
+
+model CleanData {
+  id                  Int       @id @default(autoincrement())
+  timestamp           DateTime
+  installationId      String?   @map("installation_id")
+  powerKwh            Float     @map("power_kwh")
+  loadPercent         Float?    @map("load_percent")
+  temperature         Float?
+  pressure            Float?
+  efficiency          Float?
+  specificConsumption Float?    @map("specific_consumption")
+  isOutlier           Boolean   @default(false) @map("is_outlier")
+  createdAt           DateTime  @default(now()) @map("created_at")
+
+  @@map("clean_data")
+  @@index([timestamp])
+}
+
+model Forecast {
+  id             Int      @id @default(autoincrement())
+  timestamp      DateTime
+  predictedKwh   Float    @map("predicted_kwh")
+  confidenceLower Float?  @map("confidence_lower")
+  confidenceUpper Float?  @map("confidence_upper")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("forecast")
+  @@index([timestamp])
+}
+
+model Anomaly {
+  id          Int       @id @default(autoincrement())
+  timestamp   DateTime
+  powerKwh    Float     @map("power_kwh")
+  excessKwh   Float?    @map("excess_kwh")
+  cause       String?
+  description String?
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("anomalies")
+  @@index([timestamp])
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  username       String   @unique
+  email          String?
+  hashedPassword String   @map("hashed_password")
+  role           String   @default("user")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
